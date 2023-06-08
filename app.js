@@ -71,13 +71,13 @@ app.delete('/delete_user', function (req, res){
         if (!(secret === user_secret)){
             res.end("Permission denied")
         }
-        email = req.body.email
+        id = req.body.id
         try {
             await MongoDBclient.connect()
             collection = await MongoDBclient.db('node_project').collection('users')
-            user = await collection.findOne({"email": email})
+            user = await collection.findOne({"_id": new mongo.ObjectId(id)})
             if (user){
-                await collection.deleteOne({"email": email})
+                await collection.deleteOne({"_id": new mongo.ObjectId(id)})
                 res.end("Success")
             } else {
                 res.end("No such user")
@@ -95,17 +95,19 @@ app.delete('/delete_user', function (req, res){
 
 app.post('/update_user', function (req, res){
     const update = async () =>{
-        email = req.body.email
+        id = req.body.id
         name = req.body.name
-        if (!name || !email){
+        sname = req.body.sname
+        years = req.body.years
+        if (!name || !id || !sname || !years){
             res.end("Missed some important attributes")
         }
         try {
             await MongoDBclient.connect()
             collection = await MongoDBclient.db('node_project').collection('users')
-            user = await collection.findOne({"email": email})
+            user = await collection.findOne({"_id": new mongo.ObjectId(id)})
             if (user){
-                await collection.updateOne({"email": email}, {"name": name})
+                await collection.updateOne({"_id": new mongo.ObjectId(id)}, {$set: {"name": name, "sname": sname, "years": years}})
                 res.end("Success")
             } else {
                 res.end("No such user")
